@@ -81,8 +81,9 @@ for number in "${selected_numbers[@]}"; do
       upload_file "$file"
     done
   elif [ "$number" -eq 2 ]; then
-    # If user selected 2, ask for custom file path
-    read -p "Enter the full path of the file to upload: " custom_file
+    # If user selected 2, prompt for custom file path (user will get auto-completion)
+    echo -e "\e[34mPlease enter the full path of the file to upload (auto-completion enabled):\e[0m"
+    read -e -p "File path: " custom_file
     if [ -f "$custom_file" ]; then
       upload_file "$custom_file"
     else
