@@ -1,227 +1,173 @@
 #!/bin/bash
 
-#===============================#
-#        PyCharm Installer      #
-#   Script by MaheshTechnicals  #
-#===============================#
-
-# Define colors for the UI
-GREEN="\033[1;32m"
-CYAN="\033[1;36m"
-YELLOW="\033[1;33m"
-RED="\033[1;31m"
-RESET="\033[0m"
-BOLD="\033[1m"
-UNDERLINE="\033[4m"
-
-# Stylish header with bold and underline
-echo -e "${CYAN}"
-echo "############################################################"
-echo "# ${BOLD}                    PyCharm Installer                     ${RESET} #"
-echo "# ${BOLD}               Author: MaheshTechnicals                  ${RESET} #"
-echo "############################################################"
-echo -e "${RESET}"
-
-# Function to print a title with stylish underline
-print_title() {
-    echo -e "${YELLOW}------------------------------------------------------------${RESET}"
-    echo -e "${CYAN}${UNDERLINE}$1${RESET}"
-    echo -e "${YELLOW}------------------------------------------------------------${RESET}"
+# Function to print fancy separator
+print_separator() {
+    echo -e "\e[38;5;39m╔═══════════════════════════════════════════════════════════════╗\e[0m"
 }
 
-# Function to check if Java 23 or higher is installed
-check_java_version() {
-    java_version=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
-    if [[ "$java_version" =~ ^(23|[2-9][0-9]) ]]; then
-        echo -e "${GREEN}Java version $java_version is already installed. Skipping installation.${RESET}"
-        return 1  # Java is already installed, no need to install
-    else
-        return 0  # Java is not installed or version is lower than 23
-    fi
+# Function to print centered text with custom color
+print_centered() {
+    local text="$1"
+    local color="$2"
+    local width=63
+    local padding=$(( (width - ${#text}) / 2 ))
+    echo -e "\e[38;5;39m║\e[0m$color$(printf '%*s' $padding)$text$(printf '%*s' $padding)\e[38;5;39m║\e[0m"
 }
 
-# Function to install Java 23
-install_java() {
-    print_title "Installing Java 23..."
+# Display stylish header
+clear
+print_separator
+print_centered "🚀 SourceForge File Uploader 🚀" "\e[1;38;5;51m"
+print_centered "Created by Mahesh Technicals" "\e[1;38;5;213m"
+print_centered "Version 1.4" "\e[1;38;5;159m"
+print_separator
+echo
 
-    # Check if Java 23 or higher is already installed
-    check_java_version
-    if [[ $? -eq 1 ]]; then
-        return  # Skip Java installation if it's already installed
-    fi
-
-    ARCH=$(uname -m)
-    if [[ "$ARCH" == "x86_64" ]]; then
-        JAVA_URL="https://download.java.net/java/GA/jdk23.0.1/c28985cbf10d4e648e4004050f8781aa/11/GPL/openjdk-23.0.1_linux-x64_bin.tar.gz"
-    elif [[ "$ARCH" == "aarch64" ]]; then
-        JAVA_URL="https://download.java.net/java/GA/jdk23.0.1/c28985cbf10d4e648e4004050f8781aa/11/GPL/openjdk-23.0.1_linux-aarch64_bin.tar.gz"
-    else
-        echo -e "${RED}Unsupported architecture: $ARCH. Exiting...${RESET}"
-        exit 1
-    fi
-
-    # Download and extract Java with colorful status messages
-    echo -e "${YELLOW}Downloading Java from $JAVA_URL...${RESET}"
-    wget "$JAVA_URL" -O openjdk-23.tar.gz --progress=bar
-    if [[ $? -ne 0 ]]; then
-        echo -e "${RED}Error: Failed to download Java.${RESET}"
-        exit 1
-    fi
-
-    echo -e "${CYAN}Creating /usr/lib/jvm directory...${RESET}"
-    sudo mkdir -p /usr/lib/jvm
-    echo -e "${CYAN}Extracting Java...${RESET}"
-    sudo tar -xzf openjdk-23.tar.gz -C /usr/lib/jvm
-
-    JAVA_DIR=$(tar -tf openjdk-23.tar.gz | head -n 1 | cut -f1 -d"/")
-    JAVA_PATH="/usr/lib/jvm/$JAVA_DIR"
-
-    echo -e "${CYAN}Setting up Java alternatives...${RESET}"
-    sudo update-alternatives --install /usr/bin/java java "$JAVA_PATH/bin/java" 1
-    sudo update-alternatives --set java "$JAVA_PATH/bin/java"
-
-    rm -f openjdk-23.tar.gz
-    echo -e "${GREEN}Java 23 has been installed successfully!${RESET}"
-    java -version
-}
-
-# Function to install pv utility
-install_pv() {
-    print_title "Installing pv Utility"
-    if command -v pv &>/dev/null; then
-        echo -e "${GREEN}pv is already installed.${RESET}"
-        return
-    fi
-    if command -v apt-get &>/dev/null; then
-        sudo apt-get update
-        sudo apt-get install -y pv
-    elif command -v yum &>/dev/null; then
-        sudo yum install -y pv
-    elif command -v dnf &>/dev/null; then
-        sudo dnf install -y pv
-    elif command -v pacman &>/dev/null; then
-        sudo pacman -S --noconfirm pv
-    elif command -v zypper &>/dev/null; then
-        sudo zypper install -y pv
-    else
-        echo -e "${RED}Unsupported package manager. Please install pv manually.${RESET}"
-        exit 1
-    fi
-}
-
-# Function to install jq
-install_jq() {
+# Function to check if jq is installed with stylish output
+check_dependencies() {
+    echo -e "\e[1;38;5;220m📦 Checking Dependencies...\e[0m"
     if ! command -v jq &> /dev/null; then
-        echo -e "${YELLOW}jq not found, installing jq...${RESET}"
-        sudo apt update && sudo apt install -y jq
-        if [[ $? -eq 0 ]]; then
-            echo -e "${GREEN}jq has been installed successfully!${RESET}"
-        else
-            echo -e "${RED}Error: jq installation failed.${RESET}"
-            exit 1
-        fi
+        echo -e "\e[1;38;5;208m⚠️  jq is not installed. Installing jq...\e[0m"
+        sudo apt-get update
+        sudo apt-get install -y jq
     else
-        echo -e "${GREEN}jq is already installed.${RESET}"
+        echo -e "\e[1;38;5;77m✅ jq is already installed.\e[0m"
     fi
+    echo
 }
 
-# Function to install PyCharm dynamically
-install_pycharm() {
-    install_java
-    install_jq
-
-    response=$(curl -s 'https://data.services.jetbrains.com/products/releases?code=PCC&latest=true&type=release')
-    if [[ $? -ne 0 ]]; then
-        echo "Network request failed"
-        exit 1
-    fi
-
-    version=$(echo "$response" | jq -r '.PCC[0].version' | xargs)
-    download_url=$(echo "$response" | jq -r '.PCC[0].downloads.linuxARM64.link' | xargs)
-
-    print_title "Latest PyCharm Version: $version"
-    echo "Download URL: $download_url"
-
-    local pycharm_tar="pycharm.tar.gz"
-    local install_dir="/opt/pycharm"
-
-    print_title "Downloading PyCharm"
-    wget "$download_url" -O "$pycharm_tar"
-    if [[ $? -ne 0 ]]; then
-        echo -e "${RED}Download failed! Exiting...${RESET}"
-        exit 1
-    fi
-
-    print_title "Extracting PyCharm"
-    sudo rm -rf "$install_dir"
-    sudo mkdir -p "$install_dir"
-    pv "$pycharm_tar" | sudo tar -xz --strip-components=1 -C "$install_dir"
-    rm -f "$pycharm_tar"
-
-    print_title "Creating Symbolic Link"
-    sudo ln -sf "$install_dir/bin/pycharm.sh" /usr/local/bin/pycharm
-
-    print_title "Creating Desktop Entry"
-    cat << EOF | sudo tee /usr/share/applications/pycharm.desktop > /dev/null
-[Desktop Entry]
-Name=PyCharm
-Comment=Integrated Development Environment for Python
-Exec=$install_dir/bin/pycharm.sh %f
-Icon=$install_dir/bin/pycharm.png
-Terminal=false
-Type=Application
-Categories=Development;IDE;
-StartupNotify=true
-EOF
-
-    echo -e "${GREEN}PyCharm has been installed successfully!${RESET}"
-    exit 0
+# Function to handle script interruption (CTRL+C)
+handle_interrupt() {
+    echo -e "\n\e[1;38;5;196m❌ Script interrupted! Closing SSH session...\e[0m"
+    end_ssh_session
+    exit 1
 }
 
-# Function to uninstall PyCharm
-uninstall_pycharm() {
-    local install_dir="/opt/pycharm"
-
-    print_title "Removing PyCharm Installation"
-    sudo rm -rf "$install_dir"
-
-    print_title "Removing Symbolic Link"
-    sudo rm -f /usr/local/bin/pycharm
-
-    print_title "Removing Desktop Entry"
-    sudo rm -f /usr/share/applications/pycharm.desktop
-
-    echo -e "${GREEN}PyCharm has been uninstalled successfully!${RESET}"
-    exit 0
+# Start SSH ControlMaster session
+start_ssh_session() {
+    echo -e "\e[1;38;5;75m🔄 Initializing SSH session...\e[0m"
+    SOCKET=$(mktemp -u)
+    ssh -o ControlMaster=yes -o ControlPath="$SOCKET" -fN "$SOURCEFORGE_USERNAME@frs.sourceforge.net"
 }
 
-# Display menu with colorful options
-while true; do
-    clear
-    echo -e "${CYAN}############################################################${RESET}"
-    echo -e "${CYAN}#                    PyCharm Installer                     #${RESET}"
-    echo -e "${CYAN}#               Author: MaheshTechnicals                  #${RESET}"
-    echo -e "${CYAN}############################################################${RESET}"
+# End SSH ControlMaster session
+end_ssh_session() {
+    echo -e "\e[1;38;5;75m🔒 Closing SSH session...\e[0m"
+    ssh -o ControlPath="$SOCKET" -O exit "$SOURCEFORGE_USERNAME@frs.sourceforge.net"
+}
 
-    echo -e "${YELLOW}1. Install PyCharm${RESET}"
-    echo -e "${YELLOW}2. Uninstall PyCharm${RESET}"
-    echo -e "${YELLOW}3. Exit${RESET}"
+# Trap the SIGINT (CTRL+C) signal
+trap handle_interrupt SIGINT
 
-    read -p "Choose an option: " choice
-    case $choice in
-        1) 
-            install_pycharm
-            ;;
-        2)
-            uninstall_pycharm
-            ;;
-        3)
-            exit 0
-            ;;
-        *)
-            echo -e "${RED}Invalid choice. Please try again.${RESET}"
-            read -r -p "Press any key to continue..."
-            ;;
-    esac
+# Check dependencies
+check_dependencies
+
+# Load credentials and project name from private.json
+if [ ! -f private.json ]; then
+    echo -e "\e[1;38;5;196m❌ Error: private.json not found!\e[0m"
+    exit 1
+fi
+
+# Read credentials and project name from private.json
+SOURCEFORGE_USERNAME=$(jq -r '.username' private.json)
+PROJECT_NAME=$(jq -r '.project' private.json)
+
+# Ensure all required fields are present
+if [ -z "$SOURCEFORGE_USERNAME" ] || [ -z "$PROJECT_NAME" ]; then
+    echo -e "\e[1;38;5;196m❌ Error: Missing required fields in private.json!\e[0m"
+    exit 1
+fi
+
+# Define the upload path on SourceForge
+UPLOAD_PATH="$SOURCEFORGE_USERNAME@frs.sourceforge.net:/home/frs/project/$PROJECT_NAME"
+
+# Start SSH session
+start_ssh_session
+
+# Find .img and .zip files in the current directory
+FILES=($(find . -maxdepth 1 -type f \( -name "*.img" -o -name "*.zip" \)))
+
+# Display stylish file selection menu
+print_separator
+print_centered "Available Files for Upload" "\e[1;38;5;220m"
+print_separator
+
+if [ ${#FILES[@]} -eq 0 ]; then
+    echo -e "\e[1;38;5;196m⚠️  No .img or .zip files found in current directory!\e[0m"
+    echo -e "\e[1;38;5;244m💡 Tip: Place your .img or .zip files in this directory to see them listed here\e[0m"
+    echo
+fi
+
+echo -e "\e[1;38;5;77m[1]\e[0m \e[38;5;51m📦 Upload All .img and .zip files\e[0m"
+if [ ${#FILES[@]} -eq 0 ]; then
+    echo -e "\e[1;38;5;244m   ├── Currently no files available\e[0m"
+fi
+
+echo -e "\e[1;38;5;77m[2]\e[0m \e[38;5;51m📁 Upload a file via custom path\e[0m"
+echo -e "\e[1;38;5;244m   ├── Upload any file from your system\e[0m"
+
+if [ ${#FILES[@]} -gt 0 ]; then
+    for i in "${!FILES[@]}"; do
+        echo -e "\e[1;38;5;77m[$(($i+3))]\e[0m \e[38;5;51m📄 ${FILES[$i]#./}\e[0m"
+    done
+fi
+
+print_separator
+echo
+
+# Function to upload a file with progress indicator
+upload_file() {
+    local file=$1
+    echo -e "\e[1;38;5;75m📤 Uploading: $file\e[0m"
+    echo -e "\e[1;38;5;244m➜ Destination: $UPLOAD_PATH\e[0m"
+
+    # Use scp with the SSH control socket
+    scp -o ControlPath="$SOCKET" "$file" "$UPLOAD_PATH"
+
+    # Check if the upload was successful
+    if [ $? -eq 0 ]; then
+        echo -e "\e[1;38;5;77m✅ Successfully uploaded $file\e[0m"
+    else
+        echo -e "\e[1;38;5;196m❌ Failed to upload $file\e[0m"
+    fi
+    echo
+}
+
+# Prompt for file selection
+echo -e "\e[1;38;5;220m📝 Enter the numbers of the files to upload (e.g., 2 4 5):\e[0m"
+read -p "➜ " -a selected_numbers
+
+# Upload the selected files
+for number in "${selected_numbers[@]}"; do
+    if [ "$number" -eq 1 ]; then
+        if [ ${#FILES[@]} -eq 0 ]; then
+            echo -e "\e[1;38;5;196m❌ No files available to upload all\e[0m"
+        else
+            echo -e "\e[1;38;5;75m🔄 Processing all files...\e[0m"
+            for file in "${FILES[@]}"; do
+                upload_file "$file"
+            done
+        fi
+    elif [ "$number" -eq 2 ]; then
+        echo -e "\e[1;38;5;75m📂 Enter the full path of the file to upload:\e[0m"
+        read -e -p "➜ " custom_file
+        if [ -f "$custom_file" ]; then
+            upload_file "$custom_file"
+        else
+            echo -e "\e[1;38;5;196m❌ Invalid file path: $custom_file\e[0m"
+        fi
+    elif [ "$number" -gt 2 ] && [ "$number" -le $(( ${#FILES[@]} + 2 )) ]; then
+        upload_file "${FILES[$((number-3))]}"
+    else
+        echo -e "\e[1;38;5;196m❌ Invalid selection: $number\e[0m"
+    fi
 done
 
+# End the SSH session
+end_ssh_session
+
+# Display stylish completion message
+print_separator
+print_centered "✨ Upload Process Completed ✨" "\e[1;38;5;51m"
+print_centered "Thank you for using Mahesh Technicals' Tools" "\e[1;38;5;213m"
+print_separator
